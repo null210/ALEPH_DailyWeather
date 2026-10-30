@@ -1,0 +1,6 @@
+{
+  "name": "t04-real-information-board",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node scripts/selftest.mjs", "collect": "node scripts/collect.mjs" }
+}
