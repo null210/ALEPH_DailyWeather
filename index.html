@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>서울 기온 진짜 정보판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 상단 띠(시간대) → 보기 전환(실제/합성) → 값 카드 → 일별 저장 → 재계산 → 재생 패널 */
+:root{
+  --bg:#f3f5f7; --panel:#fff; --ink:#17202a; --muted:#5a6775; --line:#d8dee5; --chip:#e7edf4;
+  --accent:#1f4f82; --good:#1d7a4a; --warn:#94590a; --bad:#b0383a; --warnbg:#fbf1df; --badbg:#fbe9e9;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#10151b; --panel:#17202a; --ink:#e3e9ef; --muted:#93a1b0; --line:#2a3542; --chip:#223040;
+  --accent:#7fb0e6; --good:#5cc48d; --warn:#e3a84d; --bad:#ef7d7d; --warnbg:#3a2c14; --badbg:#3b1c1e; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);padding:24px max(16px,env(safe-area-inset-right)) 56px max(16px,env(safe-area-inset-left))}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1{margin:0;font-size:1.65rem;letter-spacing:-.01em;text-wrap:balance}
+h2{margin:0 0 10px;font-size:.78rem;font-weight:500;letter-spacing:.06em;color:var(--muted)}
+h2.plain{margin:0;font-size:.9rem;letter-spacing:0;color:var(--ink)}
+.sub{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.small{font-size:.76rem;overflow-wrap:anywhere}
+.muted{color:var(--muted)} .strong{font-weight:500}
+.band{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding-block:10px;border-block:1px solid var(--line);font-size:.88rem}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:inherit;font-size:.9rem;padding:8px 16px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent);color:var(--panel)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;background:var(--chip);font:500 .78rem var(--f-mono);white-space:nowrap}
+.chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.chip.ok::before{background:var(--good)} .chip.bad::before{background:var(--bad)} .chip.wait::before{background:var(--warn)}
+.note{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:.88rem;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.hero{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px 22px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:20px 32px}
+.hero.is-stale{border-color:var(--warn)}
+@media (max-width:780px){.hero{grid-template-columns:1fr}}
+.lead{display:flex;flex-direction:column;gap:10px;min-width:0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.big{display:flex;align-items:baseline;gap:10px}
+.big .num{font-size:3.6rem;font-weight:500;line-height:1}
+.big .unit{font-size:1.2rem;color:var(--muted)}
+.stale{align-self:flex-start;background:var(--warnbg);color:var(--warn);font-size:.82rem;font-weight:500;padding:3px 8px;border-radius:4px}
+.delta{font-family:var(--f-mono);font-size:.92rem}
+.increase{color:var(--bad)} .decrease{color:var(--accent)} .unchanged,.flat{color:var(--muted)}
+.meaning{margin:0;border-left:3px solid var(--accent);padding:6px 12px;background:var(--chip);border-radius:0 6px 6px 0;font-size:.88rem}
+.err{background:var(--badbg);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:.88rem}
+.err strong{color:var(--bad)}
+.err .next{background:var(--panel);border-radius:4px;padding:6px 10px}
+dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 14px;margin:0;font-size:.86rem}
+dt{color:var(--muted)} dd{margin:0;min-width:0;overflow-wrap:anywhere}
+a{color:var(--accent)}
+.btn{font:inherit;font-size:.86rem;padding:7px 14px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);cursor:pointer;align-self:flex-start}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tbl{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:.8rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:.74rem}
+tr:last-child td{border-bottom:0}
+.vlist{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:.84rem}
+.okc{color:var(--good)} .badc{color:var(--bad)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.log{margin:0;padding-left:1.2em;font-size:.82rem}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;overflow-x:auto;font:12px/1.5 var(--f-mono);margin:0}
+code{font-family:var(--f-mono);font-size:.85em;background:var(--chip);padding:1px 5px;border-radius:3px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;font-size:.88rem}
+.rules ul,.rules ol{margin:0;padding-left:1.2em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>서울 기온 진짜 정보판</h1>
+    <p class="sub">실제 공개 원천(Open-Meteo)에서 하루 한 번 조회해 저장한 서울 기온을 보여줍니다. 데이터가 늦거나 틀릴 때도 마지막 정상값을 지우지 않고 지금 상태를 그대로 설명합니다. 비밀키는 쓰지 않습니다.</p>
+  </header>
+
+  <div class="band">
+    <span>기준 시간대 <strong class="mono">Asia/Seoul (UTC+09:00)</strong></span>
+    <span class="muted">일별 기록은 Asia/Seoul 날짜마다 한 행</span>
+  </div>
+
+  <nav class="tabs" aria-label="보기 전환">
+    <button type="button" class="tab" id="tab-live" data-view="live" aria-selected="true">실제 조회</button>
+    <button type="button" class="tab" id="tab-replay" data-view="replay" aria-selected="false">합성 재생 (공개 fixture)</button>
+  </nav>
+
+  <div class="note" id="liveNote">
+    <span>이 화면은 GitHub Actions가 매일 09:07 KST에 실제 원천을 조회해 저장한 <code>data/live-state.json</code>을 그대로 보여줍니다. 브라우저는 외부 API를 직접 부르지 않습니다.</span>
+    <span class="muted mono small" id="liveLoaded"></span>
+  </div>
+
+  <div class="panel" id="replayPanel" hidden>
+    <div class="row"><strong>합성 재생</strong><span class="muted small">공개 fixture(contract 1.1.0)만 씁니다. 실제 저장값과 완전히 분리된 평가 상태입니다.</span></div>
+    <div class="btns">
+      <button type="button" class="btn ghost" data-action="reset" id="btn-reset">초기화 (reset)</button>
+      <button type="button" class="btn" data-run="seq:success" id="seq-success">정상·일별 저장: D1-A → D1-B → D2</button>
+      <button type="button" class="btn" data-run="seq:recovery" id="seq-recovery">오류 뒤 회복: D1-A → D1-B → TIMEOUT (이후 다시 시도)</button>
+    </div>
+    <div class="btns">
+      <span class="muted small" style="align-self:center">각 실패 (reset → D1-A → D1-B → 실패):</span>
+      <button type="button" class="btn ghost" data-run="seq:T04-TIMEOUT" id="seq-timeout">TIMEOUT</button>
+      <button type="button" class="btn ghost" data-run="seq:T04-AUTH-401" id="seq-auth">AUTH-401</button>
+      <button type="button" class="btn ghost" data-run="seq:T04-RATE-429" id="seq-rate">RATE-429</button>
+      <button type="button" class="btn ghost" data-run="seq:T04-OFFLINE" id="seq-offline">OFFLINE</button>
+      <button type="button" class="btn ghost" data-run="seq:T04-SCHEMA-BREAK" id="seq-schema">SCHEMA-BREAK</button>
+    </div>
+    <div class="btns">
+      <span class="muted small" style="align-self:center">한 개씩:</span>
+      <button type="button" class="btn ghost" data-run="one:T04-NORMAL-D1-A">D1-A</button>
+      <button type="button" class="btn ghost" data-run="one:T04-NORMAL-D1-B">D1-B</button>
+      <button type="button" class="btn ghost" data-run="one:T04-NORMAL-D2">D2</button>
+      <button type="button" class="btn ghost" data-run="one:T04-RECOVER-D2">RECOVER-D2</button>
+    </div>
+    <ol class="log" id="replayLog"></ol>
+  </div>
+
+  <div id="board" style="display:flex;flex-direction:column;gap:24px"></div>
+
+  <section class="rules">
+    <div>
+      <h2>저장 규칙</h2>
+      <ul>
+        <li>같은 <code>signal_id + record_date</code>(Asia/Seoul 날짜)는 새 행 없이 같은 <code>record_id</code> 행을 갱신합니다.</li>
+        <li>다음 Asia/Seoul 날짜의 성공 조회는 새 일별 행을 만듭니다.</li>
+        <li>실패는 정상값을 덮어쓰거나 지우지 않고, 상태만 <code>stale / 오류 코드</code>로 바꿉니다.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>전일 대비 계산 규칙</h2>
+      <ol>
+        <li>같은 지표의 일별 행을 기록 날짜 순으로 놓습니다.</li>
+        <li>변화 = 현재 행 저장값 − 바로 앞 행 저장값 (두 값의 소수 자릿수 중 큰 쪽으로 반올림)</li>
+        <li>앞 행이 하루 전이면 “어제 대비”로 표시하고, 단위가 다르면 비교하지 않습니다.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>현재 상태 (기계 판독용)</h2>
+    <pre id="stateJson"></pre>
+  </section>
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

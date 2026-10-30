@@ -1,0 +1,15 @@
+{
+  "schema_version": "aleph-t04-evaluation-state-v1",
+  "daily_readings": [],
+  "current_reading": null,
+  "status": null,
+  "last_delta": null,
+  "last_comparison": {
+    "state": "insufficient",
+    "direction": null,
+    "magnitude": null,
+    "unit": null
+  },
+  "last_run": null,
+  "sequence": 0
+}
