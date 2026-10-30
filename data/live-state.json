@@ -1,15 +1,66 @@
 {
   "schema_version": "aleph-t04-evaluation-state-v1",
-  "daily_readings": [],
-  "current_reading": null,
-  "status": null,
+  "daily_readings": [
+    {
+      "record_id": "seoul-temperature-2m-2026-10-30",
+      "signal_id": "seoul-temperature-2m",
+      "record_date": "2026-10-30",
+      "normalized_value": 17,
+      "unit": "°C",
+      "first_fetched_at": "2026-10-30T06:50:08.889Z",
+      "last_fetched_at": "2026-10-30T06:50:08.889Z",
+      "reading": {
+        "signal_id": "seoul-temperature-2m",
+        "normalized_value": 17,
+        "unit": "°C",
+        "source_name": "Open-Meteo Forecast API (current)",
+        "source_url": "https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.978&current=temperature_2m&timezone=Asia%2FSeoul",
+        "source_time": "2026-10-30T06:45:00.000Z",
+        "fetched_at": "2026-10-30T06:50:08.889Z",
+        "record_timezone": "Asia/Seoul",
+        "record_date": "2026-10-30"
+      },
+      "raw": {
+        "path": "current.temperature_2m",
+        "value": 17,
+        "time": "2026-10-30T15:45",
+        "utc_offset_seconds": 32400,
+        "unit": "°C"
+      }
+    }
+  ],
+  "current_reading": {
+    "signal_id": "seoul-temperature-2m",
+    "normalized_value": 17,
+    "unit": "°C",
+    "source_name": "Open-Meteo Forecast API (current)",
+    "source_url": "https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.978&current=temperature_2m&timezone=Asia%2FSeoul",
+    "source_time": "2026-10-30T06:45:00.000Z",
+    "fetched_at": "2026-10-30T06:50:08.889Z",
+    "record_timezone": "Asia/Seoul",
+    "record_date": "2026-10-30"
+  },
+  "status": {
+    "freshness": "fresh",
+    "error_code": "none"
+  },
   "last_delta": null,
   "last_comparison": {
     "state": "insufficient",
     "direction": null,
     "magnitude": null,
-    "unit": null
+    "unit": null,
+    "signed": null,
+    "previous_date": null
   },
-  "last_run": null,
-  "sequence": 0
+  "last_run": {
+    "fixture_id": null,
+    "virtual_now": "2026-10-30T06:50:08.889Z",
+    "attempted_at": "2026-10-30T06:50:07.683Z",
+    "outcome": "success",
+    "error_code": "none",
+    "retry_after_seconds": null,
+    "message": null
+  },
+  "sequence": 1
 }
