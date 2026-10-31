@@ -27,40 +27,69 @@
         "utc_offset_seconds": 32400,
         "unit": "°C"
       }
+    },
+    {
+      "record_id": "seoul-temperature-2m-2026-10-31",
+      "signal_id": "seoul-temperature-2m",
+      "record_date": "2026-10-31",
+      "normalized_value": 13.5,
+      "unit": "°C",
+      "first_fetched_at": "2026-10-31T05:27:35.544Z",
+      "last_fetched_at": "2026-10-31T05:27:35.544Z",
+      "reading": {
+        "signal_id": "seoul-temperature-2m",
+        "normalized_value": 13.5,
+        "unit": "°C",
+        "source_name": "Open-Meteo Forecast API (current)",
+        "source_url": "https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.978&current=temperature_2m&timezone=Asia%2FSeoul",
+        "source_time": "2026-10-31T05:15:00.000Z",
+        "fetched_at": "2026-10-31T05:27:35.544Z",
+        "record_timezone": "Asia/Seoul",
+        "record_date": "2026-10-31"
+      },
+      "raw": {
+        "path": "current.temperature_2m",
+        "value": 13.5,
+        "time": "2026-10-31T14:15",
+        "utc_offset_seconds": 32400,
+        "unit": "°C"
+      }
     }
   ],
   "current_reading": {
     "signal_id": "seoul-temperature-2m",
-    "normalized_value": 17,
+    "normalized_value": 13.5,
     "unit": "°C",
     "source_name": "Open-Meteo Forecast API (current)",
     "source_url": "https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.978&current=temperature_2m&timezone=Asia%2FSeoul",
-    "source_time": "2026-10-30T06:45:00.000Z",
-    "fetched_at": "2026-10-30T06:50:08.889Z",
+    "source_time": "2026-10-31T05:15:00.000Z",
+    "fetched_at": "2026-10-31T05:27:35.544Z",
     "record_timezone": "Asia/Seoul",
-    "record_date": "2026-10-30"
+    "record_date": "2026-10-31"
   },
   "status": {
     "freshness": "fresh",
     "error_code": "none"
   },
-  "last_delta": null,
+  "last_delta": 3.5,
   "last_comparison": {
-    "state": "insufficient",
-    "direction": null,
-    "magnitude": null,
-    "unit": null,
-    "signed": null,
-    "previous_date": null
+    "state": "comparable",
+    "direction": "decrease",
+    "magnitude": 3.5,
+    "signed": -3.5,
+    "unit": "°C",
+    "previous_date": "2026-10-30",
+    "previous_value": 17,
+    "is_yesterday": true
   },
   "last_run": {
     "fixture_id": null,
-    "virtual_now": "2026-10-30T06:50:08.889Z",
-    "attempted_at": "2026-10-30T06:50:07.683Z",
+    "virtual_now": "2026-10-31T05:27:35.544Z",
+    "attempted_at": "2026-10-31T05:27:35.073Z",
     "outcome": "success",
     "error_code": "none",
     "retry_after_seconds": null,
     "message": null
   },
-  "sequence": 1
+  "sequence": 2
 }
